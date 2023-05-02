@@ -19,5 +19,3 @@ def denoise(symbol, days):
     plt.plot(data)
     plt.title("Denoised Trend")
     plt.show()
-
-denoise(symbol="GOOG",days=30)
