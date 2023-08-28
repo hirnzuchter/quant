@@ -1,4 +1,4 @@
-# Fourier Transform Price Trend Tool
+# Quantitative Finance Tools
 Dependencies: SciPy, Matplotlib, Requests, Numpy, nltk, tweepy, pandas, yfinance, cleanco
 
 ## Current Features
