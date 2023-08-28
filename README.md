@@ -2,7 +2,7 @@
 Dependencies: SciPy, Matplotlib, Requests, Numpy, nltk, tweepy, pandas, yfinance, cleanco
 
 ## Current Features
-- Stock Tracker Tool
+- Fourier Transform Tool
 - Asset Rebalance Tool
     - Momentum Investing Strategy
     - Sentiment Analysis Strategy
@@ -11,8 +11,7 @@ Dependencies: SciPy, Matplotlib, Requests, Numpy, nltk, tweepy, pandas, yfinance
 
 ### Current Features Notes
 The application does not make trades; it only provides the user with information and suggests management directions given the user's tracked assets.
-Due the the 5 call per minute limit of the free tier of the AlphaVantage API, loading may take artificially long. In a production version of the app,
-the paid tier would be purchased.
+Due the the 5 call per minute limit of the free tier of the AlphaVantage API, loading may take artificially long.
 
 ## Future Features
 - Backtesting Tool
@@ -21,20 +20,8 @@ the paid tier would be purchased.
 - Asset Rebalance Tool
     - Sentimental Analysis Strategy
         - Data Update Feature
-- Help
-- Forum
  
 ### Future Features Notes
-For strategy performance testing, take the user's favorited assets, and load only the data for these.
-This would mean, of course, that the user may only incorporate these in the strategy to be
-backtested. However, we are assuming that the user already tracks the assets with which
-they plan to center strategies around. For Forecasting Tool, I plan to add a Monte Carlo simulation. Include all of our rebalancing strategies
-as presets for the Backtesting and Forecasting Tools. Every time the sentimental analysis tool is run, 
+For Forecasting Tool, I plan to add a Monte Carlo simulation. Every time the sentimental analysis tool is run, 
 have it check if the time the data was last updated was more than 60 minutes ago, and if this is true,
-update the data. Add a "help" feature, which explains how to choose and tracks assets you think are valuable, 
-and how to use Stock Overflow's tools to form strategies. Allow the user to upload code,
-store it in a database, and associate that strategy with their User. Then, they may use it
-in the Rebalance Tool, Backtesting Tool, or Forecasting Tool. For the strategies, besides a python code editor,
-it would also be neat to include a visual code editor, like they have at https://vr.vex.com/,
-so that people who are new to code may also build strategies. Saved strategies can be shared with other users.
-They can also be made visible to all, visible only to the user's collaborators or groups, or private.
+update the data.
