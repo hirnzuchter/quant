@@ -22,14 +22,6 @@ import threading
 import yfinance as yf 
 from cleanco import basename
 
-'''For backtesting, take the user's favorited assets, and load only the data for these.
-This would mean, of course, that the user may only incorporate these in the strategy to be
-backtested. However, we are assuming that the user already tracks the assets with which
-they plan to center strategies around. For expected strategy return, there are two values:
-one for which we have made the ceteris paribus assumption, and the other stemming from
-averaging the results of Monte Carlo simulations. Include all of our rebalancing strategies
-as presets for the backtesting, naïve, and Monte Carlo methods.'''
-
 #We've registered lots of emails with AlphaVantage to get these keys
 keys = [
     'WWF2YGNBXK210E9A', 
@@ -49,14 +41,23 @@ twitter_api_key = "9ynDMEqpA30ASFyVF6UMrm0Dm"
 twitter_secret_api_key = "EJQZosqpLehGh7jilj72wvLCDO70FQiLfnC9GhXm939voSh18Y"
 bearer_token = "AAAAAAAAAAAAAAAAAAAAAB3VlAEAAAAAone1Vhobtx1lJzIHPrn8bpE89VU%3DZ9HqfieQFrRFMsYEiahJg0XHGA3lskbUhxZh7gGeYlvdRydJZ9"
 
-'''Returns the probability density of a normal distribution given mean and standard deviation
-at a point x'''
+def alpha_vantage_listing_status()
+    '''Returns a list of all symbols tracked by AlphaVantage'''
+    url = f'https://www.alphavantage.co/query?function=LISTING_STATUS&apikey={api_token}'
+    download = get('LISTING_STATUS')
+    decoded_content = download.content.decode('utf-8')
+    cr = csv.reader(decoded_content.splitlines(), delimiter=',')
+    my_list = list(cr)
+    return my_list
+
 def normal_dist(x , mean , sd):
+    '''Returns the probability density of a normal distribution given mean and standard deviation
+    at a point x'''
     prob_density = (np.pi*sd) * np.exp(-0.5*((x-mean)/sd)**2)
     return prob_density
 
-'''Returns the contribution of all outcomes above 0 to the expected value'''
 def pcm(dist, *args, **kwargs):
+    '''Returns the contribution of all outcomes above 0 to the expected value'''
     mean = kwargs.get('mean', None)
     stdev = kwargs.get('stdev', None)
     area = 0
@@ -69,8 +70,8 @@ def pcm(dist, *args, **kwargs):
             area += (i*step)*normal_dist(i*step, mean, stdev)*step
     return area
 
-'''Applies a softmax operation to an array'''
 def softmax(array):
+    '''Applies a softmax operation to an array'''
     total = 0
     for i in range(len(array)):
         array[i] = math.exp(array[i])
@@ -78,9 +79,9 @@ def softmax(array):
     array /= total
     return array
 
-'''Used to randomize the key used in each request,
-and to simplify the amount of code required for the get request.'''
-def get(function, ticker):
+def get(function, ticker = None):
+    '''Used to randomize the key used in each request,
+    and to simplify the amount of code required for the get request.'''
     #AlphaVantage API Keys
     random.seed(datetime.now().timestamp())
     api_token = keys[random.randrange(0, len(keys))]
@@ -91,8 +92,8 @@ def get(function, ticker):
     else:
         return data
 
-'''Calculates the mean and standard deviation of an asset's last 30-Day's returns'''
 def returns(ticker):
+    '''Calculates the mean and standard deviation of an asset's last 30-Day's returns'''
     temp = []
     temper = np.array([])
     function = 'TIME_SERIES_DAILY_ADJUSTED'
@@ -116,8 +117,8 @@ def returns(ticker):
     stdev = np.std(temper)
     return [mean, stdev]
 
-'''Returns graphs of the last 30 days' returns'''
 def return_plot(ticker):
+    '''Returns graphs of the last 30 days' returns'''
     function = 'TIME_SERIES_DAILY_ADJUSTED'
     temp = []
     request = get(function, ticker)
@@ -142,8 +143,8 @@ def return_plot(ticker):
     return (mpld3.fig_to_html(fig, d3_url=None, mpld3_url=None, no_extras=False, template_type='general', figid=None, use_http=False))
     
 
-'''Returns a portfolio based off of balancing the risk of each asset'''
 def balance_risk(symbols, budget):
+    '''Returns a portfolio based off of balancing the risk of each asset'''
     out = np.array([])
     for symbol in symbols:
         [alpha, beta] = returns(symbol)
@@ -156,11 +157,12 @@ def balance_risk(symbols, budget):
     out = { "assets": out, "strategy": "Risk Allocation Strategy"}
     return out
 
-'''Uses the thirty daily growth rates to normalize by
-probability of daily returns being positive;
-uses a normal distribution for probability;
-note that lognormal is for price and normal is for returns'''
+
 def expected_returns(symbols, budget):
+    '''Uses the thirty daily growth rates to normalize by
+    probability of daily returns being positive;
+    uses a normal distribution for probability;
+    note that lognormal is for price and normal is for returns'''
     out = np.array([])
     for symbol in symbols:
         [alpha, beta] = returns(symbol)
@@ -170,13 +172,12 @@ def expected_returns(symbols, budget):
     out = { "assets": out, "strategy": "Expected Returns Strategy"}
     return out
 
-'''
-Fetches the general data specific to the parameter (ticker) that the user requests
-Ticker is the stock symbol
-Returns a json object with all data
-Calculates the the 30 day moving average by accessing the data of a stock at the close time of each day
-'''
+
 def moving_average(ticker): 
+    '''Fetches the general data specific to the parameter (ticker) that the user requests
+    Ticker is the stock symbol
+    Returns a json object with all data
+    Calculates the the 30 day moving average by accessing the data of a stock at the close time of each day'''
     function = 'TIME_SERIES_DAILY_ADJUSTED'
     request = get(function, ticker)
     while request == None:
@@ -196,10 +197,10 @@ def moving_average(ticker):
         i+=1      
     return total/30.0
 
-'''Returns the percent growth of the 30-Day moving average,
-based off of last month's 30-Day moving average,
-and today's 30-Day moving average'''
 def momentum(ticker): 
+    '''Returns the percent growth of the 30-Day moving average,
+    based off of last month's 30-Day moving average,
+    and today's 30-Day moving average'''
     function = 'TIME_SERIES_DAILY_ADJUSTED'
     request = get(function, ticker)
     while request == None:
@@ -223,9 +224,9 @@ def momentum(ticker):
         i+=1   
     return (total_new - total_old) / total_old
 
-'''Returns a portfolio based off of assets percent returns, 
-and then applies softmax to determine allocation'''
 def momentum_strategy(symbols, budget):
+    '''Returns a portfolio based off of assets percent returns, 
+    and then applies softmax to determine allocation'''
     out = np.zeros(len(symbols))
     temp = np.array([])
     for symbol in symbols:
@@ -235,8 +236,8 @@ def momentum_strategy(symbols, budget):
     out = { "assets": out, "strategy": "Momentum Investing Strategy"}
     return out
 
-'''Returns data from the "quote" endpoint'''
 def quote(symbols):
+    '''Returns data from the "quote" endpoint'''
     function = 'GLOBAL_QUOTE'
     out = []
     for symbol in symbols:
@@ -248,6 +249,7 @@ def quote(symbols):
     return out
 
 def result_bar(strategy):
+    '''Returns a bar graph with total amounts to invest in each asset'''
     asset_name = strategy['assets'].keys()
     dollar_amount = [x for x in strategy['assets'].values()]
     for i in range(len(dollar_amount)):
@@ -268,6 +270,7 @@ def result_bar(strategy):
     return (mpld3.fig_to_html(fig, d3_url=None, mpld3_url=None, no_extras=False, template_type='general', figid=None, use_http=False))
 
 def result_pie(strategy):
+    '''Returns a pie graph with proportional amounts to invest in each asset'''
     asset_name = strategy['assets'].keys()
     percentage = [x for x in strategy['assets'].values()]
     explode = []
@@ -382,8 +385,8 @@ def write_company_rating(company_keywords, score):
             }
         )
 
-'''Performs a sentiment analysis using twitter data. Make sure to refresh the database every so often.'''
 def sentiment_analysis(symbols, budget):
+    '''Performs a sentiment analysis using twitter data. Make sure to refresh the database every so often.'''
     average_ratings = []
     for symbol in symbols:        
         stock = yf.Ticker(symbol.upper())
