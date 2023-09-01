@@ -1,5 +1,4 @@
 # Quantitative Finance Tools
-Dependencies: SciPy, Matplotlib, Requests, Numpy, nltk, tweepy, pandas, yfinance, cleanco
 
 ## Current Features
 - Fourier Transform Tool
@@ -25,3 +24,14 @@ Due the the 5 call per minute limit of the free tier of the AlphaVantage API, lo
 For Forecasting Tool, I plan to add a Monte Carlo simulation. Every time the sentimental analysis tool is run, 
 have it check if the time the data was last updated was more than 60 minutes ago, and if this is true,
 update the data.
+
+## Project Dependencies
+- SciPy
+- Matplotlib
+- Requests
+- Numpy
+- nltk
+- tweepy
+- pandas
+- yfinance
+- cleanco
